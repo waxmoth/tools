@@ -1,10 +1,17 @@
 FROM alpine:latest
 
-RUN apk --update add mysql-client perl perl-doc && \
+ARG version=1.8.3
+
+RUN apk --update add mysql-client perl perl-doc wget && \
     rm -rf /var/cache/apk/*
 
-RUN wget http://mysqltuner.pl/ -O mysqltuner.pl
-RUN wget https://raw.githubusercontent.com/major/MySQLTuner-perl/master/basic_passwords.txt -O basic_passwords.txt
-RUN wget https://raw.githubusercontent.com/major/MySQLTuner-perl/master/vulnerabilities.csv -O vulnerabilities.csv
+RUN wget -q https://github.com/major/MySQLTuner-perl/archive/refs/tags/${version}.tar.gz -O /tmp/${version}.tar.gz
+RUN tar -xzf /tmp/${version}.tar.gz --directory /tmp
+RUN mkdir /app && \
+    FILES="mysqltuner.pl basic_passwords.txt vulnerabilities.csv" && \
+    for FILE in ${FILES};do cp /tmp/MySQLTuner-perl-${version}/${FILE} /app/; done && \
+    rm /tmp/${version}.tar.gz && rm -rf /tmp/MySQLTuner-perl-*
 
-ENTRYPOINT [ "/mysqltuner.pl" ]
+WORKDIR /app
+
+ENTRYPOINT [ "/app/mysqltuner.pl" ]
