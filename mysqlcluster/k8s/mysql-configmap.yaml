@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-cluster-configmap
+data:
+  MYSQL_ROOT_PASSWORD: DB_rooter123456%
+  MYSQL_REPLICATION_USER: DB_replication
+  MYSQL_REPLICATION_PASSWORD: DB_replication123456$

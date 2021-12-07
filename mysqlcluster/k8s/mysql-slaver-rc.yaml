@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: mysql-slaver
+  labels:
+    name: mysql-slaver
+spec:
+  replicas: 1
+  selector:
+    name: mysql-slaver
+  template:
+    metadata:
+      labels:
+        name: mysql-slaver
+    spec:
+      containers:
+        - name: mysql-slaver
+          image: mysql-slaver:latest
+          imagePullPolicy: IfNotPresent # IfNotPresent - use local built image; Always - Pull image from repo
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: mysql-cluster-configmap
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_REPLICATION_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: mysql-cluster-configmap
+                  key: MYSQL_REPLICATION_USER
+            - name: MYSQL_REPLICATION_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: mysql-cluster-configmap
+                  key: MYSQL_REPLICATION_PASSWORD
