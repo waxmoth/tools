@@ -14,9 +14,6 @@ docker-compose build
 # Check the images
 minikube ssh
 > docker images
-
-# If storage not enough?
-minikube mount /data/db_data/:/data/
 ```
 
 * Create k8s pods and services
