@@ -1,0 +1,80 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-slaver
+  labels:
+    name: mysql-slaver
+spec:
+  ports:
+    - port: 3306
+      targetPort: 3306
+  selector:
+    name: mysql-slaver
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-slaver-pv
+  labels:
+    type: local
+spec:
+  storageClassName: standard
+  capacity:
+    storage: 100Gi
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  hostPath:
+    path: /data/db_data/slaver
+    type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: db-slaver-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: mysql-slaver
+  labels:
+    name: mysql-slaver
+spec:
+  replicas: 1
+  selector:
+    name: mysql-slaver
+  template:
+    metadata:
+      labels:
+        name: mysql-slaver
+    spec:
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: db-slaver-pvc
+      containers:
+        - name: mysql-slaver
+          image: mysql-slaver:latest
+          imagePullPolicy: IfNotPresent # IfNotPresent - use local built image; Always - Pull image from repo
+          resources:
+            requests:
+              memory: "2Gi"
+            limits:
+              memory: "10Gi"
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/lib/mysql
+          envFrom:
+            - configMapRef:
+                name: mysql-cluster-configmap

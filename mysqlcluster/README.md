@@ -14,17 +14,14 @@ docker-compose build
 # Check the images
 minikube ssh
 > docker images
+
+# If storage not enough?
+minikube mount /data/db_data/:/data/
 ```
 
 * Create k8s pods and services
 ```bash
-kubectl create -f k8s/mysql-configmap.yaml
-
-kubectl create -f k8s/mysql-master-rc.yaml
-kubectl create -f k8s/mysql-master-sv.yaml
-
-kubectl create -f k8s/mysql-slaver-rc.yaml
-kubectl create -f k8s/mysql-slaver-sv.yaml
+kubectl apply -f k8s/
 # Update the service?
 # kubectl replace -f k8s/mysql-master-rc.yaml
 ```
@@ -39,14 +36,28 @@ kubectl get svc
 kubectl get pods -o wide
 ```
 
-* Delete pod
-```bash
-kubectl delete pods mysql-master-*
-```
-
 * Check the DB in the container
 ```bash
 kubectl exec $(kubectl get pods|grep mysql-master|tail -n 1|awk '{print $1}') -it -- /bin/bash
 > export MYSQL_PWD=${MYSQL_ROOT_PASSWORD}
 > mysql -uroot
+```
+
+* Delete pod
+```bash
+kubectl delete pods $(kubectl get pods|grep mysql-master|tail -n 1|awk '{print $1}')
+kubectl delete pods $(kubectl get pods|grep mysql-slaver|tail -n 1|awk '{print $1}')
+```
+
+* Clean the services and pods
+```shell script
+kubectl delete rc mysql-master
+kubectl delete rc mysql-slaver
+kubectl delete svc mysql-master
+kubectl delete svc mysql-salver
+
+kubectl delete pvc db-master-pvc
+kubectl delete pvc db-slaver-pvc
+kubectl delete pv db-master-pv
+kubectl delete pv db-slaver-pv
 ```
