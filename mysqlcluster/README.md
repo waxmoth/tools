@@ -23,7 +23,7 @@ minikube mount /data/db_data/:/data/
 ```bash
 kubectl apply -f k8s/
 # Update the service?
-# kubectl replace -f k8s/mysql-master-rc.yaml
+# kubectl replace -f k8s/mysql-master.yaml
 ```
 
 * Check services
