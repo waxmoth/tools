@@ -67,7 +67,7 @@ spec:
           imagePullPolicy: IfNotPresent # IfNotPresent - use local built image; Always - Pull image from repo
           resources:
             requests:
-              memory: "10Gi"
+              memory: "2Gi"
             limits:
               memory: "10Gi"
           ports:
