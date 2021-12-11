@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  namespace: default
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: mysql-master.test
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mysql-master
+                port:
+                  number: 3306
+    - host: mysql-slaver.test
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: mysql-slaver
+                port:
+                  number: 3306
