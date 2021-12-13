@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-cronjob-configmap
+data:
+  MYSQL_USER: DB_killer
+  MYSQL_HOST: mysql-master
+  MAX_RUN_TIME: "300"
+  MYSQL_PWD: DB_killer123456%
+  CHECK_DB_USERS: '"root","reader"'
