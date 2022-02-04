@@ -1,0 +1,25 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: app-cronjob
+spec:
+  schedule: "*/5 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: mysqlkiller-cronjob
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: mysqlkiller
+              image: mysqlkiller
+              imagePullPolicy: IfNotPresent
+              command:
+                - "./bin/mysql_killer.sh"
+              envFrom:
+                - configMapRef:
+                    name: app-cronjob-configmap

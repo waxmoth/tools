@@ -3,6 +3,7 @@ kind: ConfigMap
 metadata:
   name: mysql-cluster-configmap
 data:
-  MYSQL_ROOT_PASSWORD: DB_rooter123456%
+  MYSQL_MASTER_SERVICE_HOST: mysql-master
   MYSQL_REPLICATION_USER: DB_replication
   MYSQL_REPLICATION_PASSWORD: DB_replication123456$
+  MYSQL_ROOT_PASSWORD: DB_rooter123456%
