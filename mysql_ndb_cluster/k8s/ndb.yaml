@@ -1,0 +1,62 @@
+apiVersion: mysql.oracle.com/v1alpha1
+kind: NdbCluster
+metadata:
+  name: mysql-ndb
+spec: # For more configures please check https://github.com/mysql/mysql-ndb-operator/blob/ab737ccd109697628f253e0532e6f9028320c42e/docs/NdbCluster-CRD.md#ndbclusterconditiontypestring-alias
+  nodeCount: 2 # Number of Data Nodes
+  redundancyLevel: 2 # MySQL Cluster Replica
+
+  dataNodeConfig:
+    DataMemory: 100M
+    MaxNoOfTables: 1024
+    MaxNoOfConcurrentOperations: 409600
+    Arbitration: WaitExternal
+  dataNodePVCSpec:
+    storageClassName: manual
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 20Gi
+  mysqld:
+    nodeCount: 2 # Number of MySQL Servers
+
+    myCnf: |
+      [mysqld]
+      max-user-connections = 42
+      ndb-extra-logging = 20
+      expire-logs-days = 30
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ndb-pv1
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/ndb_data/node1"
+    type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ndb-pv2
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/data/ndb_data/node2"
+    type: DirectoryOrCreate
