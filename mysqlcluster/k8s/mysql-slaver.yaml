@@ -16,7 +16,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: mysql-slaver-pv
+  name: db-slaver-pv
   labels:
     type: local
 spec:
@@ -36,6 +36,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: db-slaver-pvc
 spec:
+  storageClassName: standard
   accessModes:
     - ReadWriteOnce
   resources:
