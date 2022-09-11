@@ -48,13 +48,13 @@ kubectl delete pods $(kubectl get pods|grep mysql-slaver|tail -n 1|awk '{print $
 
 * Clean the services and pods
 ```shell script
-kubectl delete rc mysql-master
 kubectl delete rc mysql-slaver
-kubectl delete svc mysql-master
-kubectl delete svc mysql-salver
-
-kubectl delete pvc db-master-pvc
+kubectl delete svc mysql-slaver
 kubectl delete pvc db-slaver-pvc
-kubectl delete pv db-master-pv
 kubectl delete pv db-slaver-pv
+
+kubectl delete rc mysql-master
+kubectl delete svc mysql-master
+kubectl delete pvc db-master-pvc
+kubectl delete pv db-master-pv
 ```

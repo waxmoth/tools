@@ -16,7 +16,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: mysql-master-pv
+  name: db-master-pv
   labels:
     type: local
 spec:
@@ -36,6 +36,7 @@ kind: PersistentVolumeClaim
 metadata:
   name: db-master-pvc
 spec:
+  storageClassName: standard
   accessModes:
     - ReadWriteOnce
   resources:
