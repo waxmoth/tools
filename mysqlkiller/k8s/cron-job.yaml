@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: app-cronjob
+  name: app-cronjob-mysqlkiller
 spec:
   schedule: "*/5 * * * *"
   successfulJobsHistoryLimit: 3
