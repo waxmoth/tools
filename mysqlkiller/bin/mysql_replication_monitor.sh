@@ -35,6 +35,7 @@ MySQL replication delay, please check and fix it!
 
 MySQL Monitor
 EOL
+    exit 1
 fi
 
 log 'Done!'
