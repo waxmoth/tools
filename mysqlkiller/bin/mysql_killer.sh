@@ -30,7 +30,7 @@ get_thread_sql() {
 
 log 'Kill sleeping and long run DB connections for user: '"${CHECK_DB_USERS}";
 
-threadIds=$( \
+threadIds=$(
     mysql \
         -u "${MYSQL_USER}" \
         -h "${MYSQL_HOST}" \

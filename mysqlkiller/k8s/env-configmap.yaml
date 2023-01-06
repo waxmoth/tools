@@ -8,3 +8,6 @@ data:
   MAX_RUN_TIME: "300"
   MYSQL_PWD: DB_killer123456%
   CHECK_DB_USERS: '"reader"'
+  MAX_REPLICATION_DELAY: "300"
+  EMAIL_TO: waxmoth@qq.com
+  EMAIL_FROM: noreply@example.com
