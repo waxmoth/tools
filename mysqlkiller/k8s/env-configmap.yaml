@@ -11,3 +11,4 @@ data:
   MAX_REPLICATION_DELAY: "300"
   EMAIL_TO: waxmoth@qq.com
   EMAIL_FROM: noreply@example.com
+  SMTP_HOST: mail-service:1025
