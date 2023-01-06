@@ -27,10 +27,12 @@ secondsDelay=$(
 log "Checking the DB replication delay: ${secondsDelay}"
 
 if [[ ${secondsDelay} -gt ${MAX_REPLICATION_DELAY} ]]; then
-    /usr/sbin/sendmail -i -t -v "${EMAIL_TO}" -f "${EMAIL_FROM}" << EOL
+    sendmail -i -t "${EMAIL_TO}" -f "${EMAIL_FROM}" << EOL
 Subject: [ALERT] DB replication!
 
-DB replication delay, please check and fix it!
+MySQL replication delay, please check and fix it!
+
+MySQL Monitor
 EOL
 fi
 
