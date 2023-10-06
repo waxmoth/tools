@@ -4,32 +4,33 @@
 MYSQL_USER=${MYSQL_USER:-'root'}
 MYSQL_HOST=${MYSQL_HOST:-'127.0.0.1'}
 MAX_RUN_TIME=${MAX_RUN_TIME:-3000}
-CHECK_DB_USERS=${MYSQL_USERS:-"'root'"}
+CHECK_DB_USERS=${CHECK_DB_USERS:-"'root'"}
 
 export MYSQL_PWD=${MYSQL_PWD:-root}
 
 log() {
-    echo $(date +"%Y-%m-%d %H:%M:%S|")"$1";
+    date +"%Y-%m-%d %H:%M:%S|$1";
 }
 
 get_thread_sql() {
-	local threadId=$1;
-	echo $(
+    local threadId=$1;
+    query=$(
         mysql \
             -u "${MYSQL_USER}" \
             -h "${MYSQL_HOST}" \
             -N \
             -e \
             "
-            SELECT SQL_TEXT FROM performance_schema.events_statements_current WHERE THREAD_ID = ${threadId};
+            SELECT INFO FROM INFORMATION_SCHEMA.PROCESSLIST WHERE ID = ${threadId};
             "
     )
-    return;
+
+    echo "$query";
 }
 
-log 'Kill sleeping and long run DB connections';
+log 'Kill sleeping and long run DB connections for user: '"${CHECK_DB_USERS}";
 
-threadIds=$( \
+threadIds=$(
     mysql \
         -u "${MYSQL_USER}" \
         -h "${MYSQL_HOST}" \
@@ -40,10 +41,9 @@ threadIds=$( \
         "
 )
 
-log 'Get thread ids: '"${threadIds}";
-
 for threadId in ${threadIds}; do
-    log 'Kill thread: '${threadId}'|Query: '$(get_thread_sql ${threadId})
+    query=$(get_thread_sql "${threadId}")
+    log "Killed thread: ${threadId}|Query: ${query}"
     # Note: You can run 'CALL mysql.rds_kill(${threadId});' for AWS RDS
     mysql \
         -u "${MYSQL_USER}" \
