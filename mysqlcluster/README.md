@@ -58,3 +58,12 @@ kubectl delete svc mysql-master
 kubectl delete pvc db-master-pvc
 kubectl delete pv db-master-pv
 ```
+
+## Expose the MySQL TCP ports through the ingress
+```shell
+kubectl patch deployment ingress-nginx-controller -n ingress-nginx \
+  --patch-file k8s/patch/ingress-nginx-controller-patch.yaml
+
+# Test the tcp port
+telnet $(minikube ip) 3306
+```
