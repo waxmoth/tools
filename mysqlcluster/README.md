@@ -61,6 +61,13 @@ kubectl delete pv db-master-pv
 
 ## Expose the MySQL TCP ports through the ingress
 ```shell
+# Enable the ingress addon if it not be enabled
+minikube addons enable ingress
+
+# Patch the tcp services configmap to expose the MySQL TCP port
+kubectl patch configmap tcp-services -n ingress-nginx \
+  --patch-file k8s/patch/ingress-nginx-tcp-configmap-patch.yaml
+
 kubectl patch deployment ingress-nginx-controller -n ingress-nginx \
   --patch-file k8s/patch/ingress-nginx-controller-patch.yaml
 

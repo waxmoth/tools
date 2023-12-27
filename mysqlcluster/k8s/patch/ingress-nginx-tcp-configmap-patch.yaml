@@ -1,0 +1,3 @@
+data:
+  3306: "default/mysql-master:3306"
+  3307: "default/mysql-slaver:3306"

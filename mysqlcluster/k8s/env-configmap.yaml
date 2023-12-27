@@ -7,13 +7,3 @@ data:
   MYSQL_REPLICATION_USER: DB_replication
   MYSQL_REPLICATION_PASSWORD: DB_replication123456$
   MYSQL_ROOT_PASSWORD: DB_rooter123456%
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: tcp-services
-  namespace: ingress-nginx
-data:
-  3306: "default/mysql-master:3306"
-  3307: "default/mysql-slaver:3306"
