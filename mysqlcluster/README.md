@@ -9,7 +9,7 @@ A MySQL master/slave cluster run in the Kubernetes
 ```bash
 # Build local images into the k8s
 eval $(minikube docker-env)
-docker-compose build
+docker compose build
 
 # Check the images
 minikube ssh
@@ -57,4 +57,22 @@ kubectl delete rc mysql-master
 kubectl delete svc mysql-master
 kubectl delete pvc db-master-pvc
 kubectl delete pv db-master-pv
+```
+
+## Expose the MySQL TCP ports through the ingress
+```shell
+# Enable the ingress addon if it not be enabled
+minikube addons enable ingress
+
+# Patch the tcp services configmap to expose the MySQL TCP port
+kubectl patch configmap tcp-services -n ingress-nginx \
+  --patch-file k8s/patch/ingress-nginx-tcp-configmap-patch.yaml
+
+kubectl patch deployment ingress-nginx-controller -n ingress-nginx \
+  --patch-file k8s/patch/ingress-nginx-controller-patch.yaml
+
+# Test the tcp port
+telnet mysql-master.test 3306
+telnet mysql-slaver.test 3307
+
 ```

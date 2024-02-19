@@ -8,7 +8,7 @@ spec:
   ports:
     - port: 3306
       targetPort: 3306
-  type: NodePort
+  type: ClusterIP
   selector:
     name: mysql-slaver
 
@@ -44,8 +44,8 @@ spec:
       storage: 50Gi
 
 ---
-apiVersion: v1
-kind: ReplicationController
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: mysql-slaver
   labels:
@@ -53,7 +53,10 @@ metadata:
 spec:
   replicas: 1
   selector:
-    name: mysql-slaver
+    matchLabels:
+      name: mysql-slaver
+  strategy:
+    type: Recreate
   template:
     metadata:
       labels:

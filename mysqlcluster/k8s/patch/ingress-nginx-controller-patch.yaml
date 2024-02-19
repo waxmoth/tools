@@ -1,0 +1,10 @@
+spec:
+  template:
+    spec:
+      containers:
+        - name: controller
+          ports:
+            - containerPort: 3306
+              hostPort: 3306
+            - containerPort: 3307
+              hostPort: 3307
