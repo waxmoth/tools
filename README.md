@@ -10,3 +10,4 @@ The small tools running by docker or K8s
 * [MySQLTuner](./mysqltuner)
 * [MySQLKiller](./mysqlkiller)
 * [MySQLCluster](./mysqlcluster)
+* [Redis](./redis)
