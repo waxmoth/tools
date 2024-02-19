@@ -42,10 +42,10 @@ telnet $(minikube ip) 9092
 kubectl exec -n kafka svc/kafka-service -it -- /bin/bash
 
 # Get the topics
-kafka-topics.sh --zookeeper ${KAFKA_ZOOKEEPER_CONNECT} --list
+kafka-topics.sh --bootstrap-server localhost:9092 --list
 
 # Create one topic
-kafka-topics.sh --zookeeper ${KAFKA_ZOOKEEPER_CONNECT} --create \
+kafka-topics.sh --bootstrap-server localhost:9092 --create \
   --topic TOPIC_NAME --partitions 1 --replication-factor 1
 
 # Get Topic offsets
@@ -63,7 +63,18 @@ kafka-verifiable-consumer.sh --broker-list ${KAFKA_ADVERTISED_LISTENERS} \
   --group-id default_group --max-messages 2
 
 # Check the topic details
-kafka-topics.sh --zookeeper ${KAFKA_ZOOKEEPER_CONNECT} --describe --topic test
+kafka-topics.sh --bootstrap-server localhost:9092 --describe --topic test
+
+# Manually consume a topic
+kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic test --from-beginning
+
+# Change the topic retention time. e.g. delete messages after 3 days
+kafka-configs.sh --bootstrap-server localhost:9092 --alter \
+  --entity-type topics --entity-name test \
+  --add-config retention.ms=259200000,cleanup.policy=delete
+
+kafka-configs.sh --bootstrap-server localhost:9092 --describe \
+  --entity-type topics --entity-name test
 ```
 
 ## Testing the kafka service by [KafkaCat](https://docs.confluent.io/platform/current/tools/kafkacat-usage.html)
