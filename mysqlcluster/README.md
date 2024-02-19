@@ -35,7 +35,7 @@ kubectl get pods -o wide
 
 * Check the DB in the container
 ```bash
-kubectl exec $(kubectl get pods|grep mysql-master|tail -n 1|awk '{print $1}') -it -- /bin/bash
+kubectl exec svc/mysql-master -it -- /bin/bash
 > export MYSQL_PWD=${MYSQL_ROOT_PASSWORD}
 > mysql -uroot
 ```
