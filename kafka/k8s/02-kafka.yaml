@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: kafka-broker
+  name: kafka-service
+  namespace: kafka
+spec:
+  ports:
+    - port: 9092
+  selector:
+    app: kafka-broker
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  labels:
+    app: kafka-service
+  name: kafka-broker-pv
+  namespace: kafka
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: standard
+  capacity:
+    storage: 20Gi
+  persistentVolumeReclaimPolicy: Retain
+  hostPath:
+    path: /data/kafka_data/broker # Fix the permission issue: sudo chown -R 1001:1001 /data/kafka_data
+    type: DirectoryOrCreate
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: kafka-service
+  name: kafka-broker-pvc
+  namespace: kafka
+spec:
+  storageClassName: standard
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kafka-broker
+  name: kafka-broker
+  namespace: kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-broker
+  template:
+    metadata:
+      labels:
+        app: kafka-broker
+    spec:
+      hostname: kafka-broker
+      volumes:
+        - name: kafka-data
+          persistentVolumeClaim:
+            claimName: kafka-broker-pvc
+      containers:
+        - env:
+            - name: KAFKA_BROKER_ID
+              value: "1"
+            - name: KAFKA_ZOOKEEPER_CONNECT
+              value: zookeeper-service.kafka:2181
+            - name: KAFKA_LISTENERS
+              value: PLAINTEXT://:9092
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: PLAINTEXT://local-kafka.test:9092 # Add this record into the /etc/hosts file
+          image: bitnami/kafka:3.6.1
+          imagePullPolicy: IfNotPresent
+          name: kafka-broker
+          ports:
+            - containerPort: 9092
+          volumeMounts:
+            - mountPath: /bitnami
+              name: kafka-data

@@ -9,7 +9,7 @@ A MySQL master/slave cluster run in the Kubernetes
 ```bash
 # Build local images into the k8s
 eval $(minikube docker-env)
-docker-compose build
+docker compose build
 
 # Check the images
 minikube ssh
@@ -35,7 +35,7 @@ kubectl get pods -o wide
 
 * Check the DB in the container
 ```bash
-kubectl exec $(kubectl get pods|grep mysql-master|tail -n 1|awk '{print $1}') -it -- /bin/bash
+kubectl exec svc/mysql-master -it -- /bin/bash
 > export MYSQL_PWD=${MYSQL_ROOT_PASSWORD}
 > mysql -uroot
 ```
@@ -72,5 +72,7 @@ kubectl patch deployment ingress-nginx-controller -n ingress-nginx \
   --patch-file k8s/patch/ingress-nginx-controller-patch.yaml
 
 # Test the tcp port
-telnet $(minikube ip) 3306
+telnet mysql-master.test 3306
+telnet mysql-slaver.test 3307
+
 ```
