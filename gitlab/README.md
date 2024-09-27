@@ -53,7 +53,8 @@ helm upgrade -i gitlab-runner gitlab/gitlab-runner \
 # If the runner cannot be registered by the TSL issue, you can use the following command to set the internal url
 helm upgrade -i gitlab-runner gitlab/gitlab-runner \
   --namespace gitlab \
-  --set gitlabUrl=http://gitlab-webservice-default.gitlab:8080,runnerToken=${RUNNER_TOKEN},runUntagged=true
+  --set gitlabUrl=http://gitlab-webservice-default.gitlab:8080,runnerToken=${RUNNER_TOKEN},runUntagged=true \
+  --set rbac.create=true,rbac.serviceAccount=gitlab-runner,rbac.serviceAccountName=gitlab-runner
 ```
 
 * Troubleshoots for GitLab Runner:
@@ -61,7 +62,24 @@ helm upgrade -i gitlab-runner gitlab/gitlab-runner \
 1. Got error from the job which related to `SSL certificate problem: self-signed certificate`
 
 > Set the variables in the project's CI/CD settings, `GIT_SSL_NO_VERIFY=1`
-Or try to add the self-signed CA in the cluster, [doc](https://docs.gitlab.com/runner/configuration/tls-self-signed.html)
+Or try to add the self-signed CA in the cluster,
+[doc](https://docs.gitlab.com/runner/configuration/tls-self-signed.html).
+
+* Upgrade the service
+
+```shell
+# Export current HELM values
+helm get values gitlab -n gitlab > gitlab_values.yaml
+
+# For more versions: https://docs.gitlab.com/charts/installation/version_mappings.html
+helm upgrade gitlab gitlab/gitlab -n gitlab \
+  --version <CHART_NEW_VERSION> \
+  -f gitlab_values.yaml \
+  --set gitlab.migrations.enabled=true \
+  --set global.gitlabVersion= <GITLAB_VERSION>
+```
+
+> You can check the new version form the website, path: Help -> Help
 
 * Uninstall the service
 
