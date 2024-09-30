@@ -16,5 +16,6 @@ helm upgrade -i gitlab gitlab/gitlab \
   --set global.image.pullPolicy=IfNotPresent \
   --set certmanager-issuer.email="${GITLAB_CA_ISSUER_EMAIL:-me@example.com}" \
   --set gitlab-runner.install=false \
+  --set registry.enabled=false \
   --set nginx-ingress.controller.replicaCount=1 \
   --set nginx-ingress.controller.service.type=NodePort
