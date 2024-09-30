@@ -1,0 +1,2 @@
+data:
+  9092: "kafka/kafka-service:9092"
