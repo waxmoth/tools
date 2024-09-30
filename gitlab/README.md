@@ -42,6 +42,19 @@ helm upgrade -i gitlab gitlab/gitlab \
 git clone ssh://git@gitlab.example.com:32022/[Project]/[REPO].git
 ```
 
+* Reduce the deployment replicas
+
+The default min replicas is 2 for webservice, gitlab-shell, kas and sidekiq.
+We can use the following commands to reduce the deployment replicas.
+
+```shell
+# Get the current replicas
+kubectl get hpa -n gitlab
+
+# Modify the configure and set the minReplicas to 1
+kubectl edit hpa gitlab-webservice-default -n gitlab
+```
+
 * Register Gitlab runner into the cluster
 
 ```bash

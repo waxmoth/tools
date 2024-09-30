@@ -1,0 +1,2 @@
+data:
+  5601: "elk/kibana-kb-http:5601"  # Kibana HTTP service
