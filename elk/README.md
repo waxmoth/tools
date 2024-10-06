@@ -9,13 +9,17 @@ Run the ELK([Elaticsearch](https://www.elastic.co/elasticsearch) +
 * Install the service
 
 ```bash
-# Add elasticsearch Custom Resource Definition (CRDs)
-kubectl create -f https://download.elastic.co/downloads/eck/2.14.0/crds.yaml
-# Add the operator
-kubectl apply -f https://download.elastic.co/downloads/eck/2.14.0/operator.yaml
-
 export K8S_NAMESPACE="elk"
 # kubectl create ns "${K8S_NAMESPACE}"
+
+# Install the operator and CRDs
+helm upgrade -i elastic-operator elastic/eck-operator -n elastic-system \
+  --set=installCRDs=true \
+  --set=managedNamespaces="{${K8S_NAMESPACE:-default}}" \
+  --set=createClusterScopedResources=false \
+  --set=webhook.enabled=false \
+  --set=config.validateStorageClass=false
+
 bin/install.sh
 # It would take a few minutes for the service to be ready
 ```
@@ -37,6 +41,8 @@ kubectl patch deployment ingress-nginx-controller -n ingress-nginx \
 kubectl get secret elasticsearch-es-elastic-user -n ${K8S_NAMESPACE} -o=jsonpath='{.data.elastic}' | \
   base64 --decode; echo
 ```
+
+* Check the Kibana status `https://[HOST]:5601/status`
 
 * Uninstall the service
 

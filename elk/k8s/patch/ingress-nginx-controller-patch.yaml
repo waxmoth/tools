@@ -6,3 +6,5 @@ spec:
           ports:
             - containerPort: 5601
               hostPort: 5601
+            - containerPort: 5044
+              hostPort: 5044
