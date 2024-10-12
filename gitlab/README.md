@@ -70,6 +70,16 @@ helm upgrade -i gitlab-runner gitlab/gitlab-runner \
   --set rbac.create=true,rbac.serviceAccount=gitlab-runner,rbac.serviceAccountName=gitlab-runner
 ```
 
+* Register Gitlab runner from docker into Gitlab
+
+```shell
+# Register the runner
+docker compose run --rm gitlab-runner register --url <GITLAB_URL> --token <RUNNER_TOKEN>
+
+# Start the runner service
+docker compose up -d
+```
+
 * Troubleshoots for GitLab Runner:
 
 1. Got error from the job which related to `SSL certificate problem: self-signed certificate`

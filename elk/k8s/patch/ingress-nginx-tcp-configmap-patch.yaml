@@ -1,3 +1,4 @@
 data:
   5601: "elk/kibana-kb-http:5601"  # Kibana HTTP service
   5044: "elk/logstash-ls-beats-ls-beats:5044"  # Logstash TCP service
+  9200: "elk/elasticsearch-es-http:9200"  # Elasticsearch HTTP service
