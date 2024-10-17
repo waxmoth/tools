@@ -1,0 +1,16 @@
+volumes:
+    - name: gitlab-runners-cache
+      persistentVolumeClaim:
+        claimName: gitlab-runners-cache-pvc
+
+runners:
+  config: |
+    [[runners]]
+      cache_dir = "/cache"
+      [runners.kubernetes]
+      namespace = "{{.Release.Namespace}}"
+      image = "alpine"
+      pull_policy = "if-not-present"
+    [[runners.kubernetes.volumes.pvc]]
+      name = "gitlab-runners-cache-pvc"
+      mount_path = "/cache"
