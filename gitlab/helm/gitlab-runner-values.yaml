@@ -3,6 +3,13 @@ volumes:
       persistentVolumeClaim:
         claimName: gitlab-runners-cache-pvc
 
+rbac:
+  create: true
+  serviceAccount: gitlab-runner
+serviceAccount:
+  create: true
+  name: gitlab-runner
+
 runners:
   config: |
     [[runners]]

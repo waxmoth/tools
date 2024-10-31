@@ -6,5 +6,5 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./config:/etc/gitlab-runner:Z # Save the configuration file
-      - data/cache:/cache # Save the runner cache
+      - ./data/cache:/cache # Save the runner cache
     restart: unless-stopped
