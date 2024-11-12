@@ -67,8 +67,7 @@ helm upgrade -i gitlab-runner gitlab/gitlab-runner \
 helm upgrade -i gitlab-runner gitlab/gitlab-runner \
   --namespace gitlab \
   -f helm/gitlab-runner-values.yaml \
-  --set gitlabUrl=http://gitlab-webservice-default.gitlab:8080,runnerToken=${RUNNER_TOKEN},runUntagged=true \
-
+  --set gitlabUrl=http://gitlab-webservice-default.gitlab:8181,runnerToken=${RUNNER_TOKEN},runUntagged=true
 ```
 
 * Register Gitlab runner from docker into Gitlab
