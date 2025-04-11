@@ -14,6 +14,7 @@ runners:
   config: |
     [[runners]]
       cache_dir = "/cache"
+      clone_url = "{{.Values.gitlabUrl}}"
       [runners.kubernetes]
       namespace = "{{.Release.Namespace}}"
       image = "alpine"
