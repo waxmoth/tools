@@ -61,13 +61,15 @@ kubectl edit hpa gitlab-webservice-default -n gitlab
 helm upgrade -i gitlab-runner gitlab/gitlab-runner \
   --namespace gitlab \
   -f helm/gitlab-runner-values.yaml \
-  --set gitlabUrl=http://gitlab.${GITLAB_HOST},runnerToken=${RUNNER_TOKEN},runUntagged=true
+  --set gitlabUrl=http://gitlab.${GITLAB_HOST},runnerToken=${RUNNER_TOKEN},runUntagged=true \
+  --set s3ServerAddress=${S3_SERVER_ADDRESS},s3AccessKey=${S3_ACCESS_KEY},s3SecretKey=${S3_SECRET_KEY},s3BucketName=${S3_BUCKET_NAME}
 
 # If the runner cannot be registered by the TSL issue, you can use the following command to set the internal url
 helm upgrade -i gitlab-runner gitlab/gitlab-runner \
   --namespace gitlab \
   -f helm/gitlab-runner-values.yaml \
-  --set gitlabUrl=http://gitlab-webservice-default.gitlab:8181,runnerToken=${RUNNER_TOKEN},runUntagged=true
+  --set gitlabUrl=http://gitlab-webservice-default.gitlab:8181,runnerToken=${RUNNER_TOKEN},runUntagged=true \
+  --set s3ServerAddress=${S3_SERVER_ADDRESS},s3AccessKey=${S3_ACCESS_KEY},s3SecretKey=${S3_SECRET_KEY},s3BucketName=${S3_BUCKET_NAME}
 ```
 
 * Register Gitlab runner from docker into Gitlab
