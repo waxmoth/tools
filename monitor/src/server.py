@@ -501,7 +501,7 @@ class Handler(BaseHTTPRequestHandler):
         with SAMPLER.lock:
             payload = SAMPLER.snapshot
         if payload is None:
-            self.send_json(503, {"ok": False, "error": "正在采样"})
+            self.send_json(503, {"ok": False, "error": "Sampling"})
             return
         self.send_json(200 if payload.get("ok", True) else 500, payload)
 
@@ -512,7 +512,7 @@ class Handler(BaseHTTPRequestHandler):
                 start = int(query.get("start", ["0"])[0])
                 end = int(query.get("end", ["0"])[0])
             except ValueError:
-                self.send_json(400, {"ok": False, "error": "时间范围无效"})
+                self.send_json(400, {"ok": False, "error": "Invalid time range"})
                 return
             now = int(time.time() * 1000)
             if end > now:
@@ -521,7 +521,7 @@ class Handler(BaseHTTPRequestHandler):
             if start < earliest:
                 start = earliest
             if end - start < 5000 or end - start > RETENTION_S * 1000:
-                self.send_json(400, {"ok": False, "error": "时间范围无效"})
+                self.send_json(400, {"ok": False, "error": "Invalid time range"})
                 return
             self.send_json(200, HISTORY.query_between(start, end))
             return
@@ -531,7 +531,7 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError:
             seconds = 0
         if seconds not in RANGES:
-            self.send_json(400, {"ok": False, "error": "未知时间范围"})
+            self.send_json(400, {"ok": False, "error": "Unknown time range"})
             return
         self.send_json(200, HISTORY.query(seconds))
 

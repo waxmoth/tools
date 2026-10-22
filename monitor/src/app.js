@@ -63,8 +63,8 @@ function setStatus(ok, message) {
 }
 
 function displayError(message) {
-  if (message === "采样失败") return t("sampleFailed");
-  if (message === "正在采样") return t("warming");
+  if (message === "Sample failed") return t("sampleFailed");
+  if (message === "Sampling") return t("warming");
   return message || t("sampleFailed");
 }
 
@@ -309,7 +309,7 @@ async function tick() {
   try {
     const response = await fetch("/api/stats", { cache: "no-store" });
     const data = await response.json();
-    if (!response.ok || !data.ok) throw new Error(data.error || "采样失败");
+    if (!response.ok || !data.ok) throw new Error(data.error || "Sample failed");
     lastData = data;
     render(data);
     setStatus(true);
@@ -570,7 +570,7 @@ async function openZoom(metric) {
   try {
     await loadZoom();
   } catch (error) {
-    document.querySelector("#zoom-note").textContent = error.message === "时间范围无效"
+    document.querySelector("#zoom-note").textContent = error.message === "Invalid time range"
       ? t("badRange")
       : error.message;
   }
@@ -596,7 +596,7 @@ document.querySelector("#zoom-filter").addEventListener("submit", async (event) 
   try {
     await loadZoom();
   } catch (error) {
-    document.querySelector("#zoom-note").textContent = error.message === "时间范围无效"
+    document.querySelector("#zoom-note").textContent = error.message === "Invalid time range"
       ? t("badRange")
       : error.message;
   }
@@ -652,7 +652,7 @@ window.addEventListener("mouseup", async () => {
   try {
     await loadZoom();
   } catch (error) {
-    document.querySelector("#zoom-note").textContent = error.message === "时间范围无效"
+    document.querySelector("#zoom-note").textContent = error.message === "Invalid time range"
       ? t("badRange")
       : error.message;
   }
