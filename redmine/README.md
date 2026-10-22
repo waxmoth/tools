@@ -1,0 +1,114 @@
+# K8s Redmine
+
+Run the [Redmine](https://www.redmine.org/) in the Kubernetes
+
+## Usage
+
+* Install the service
+
+```bash
+export K8S_NAMESPACE="redmine"
+export GITLAB_HOST="example.com"
+export GITLAB_CA_ISSUER_EMAIL="me@example.com"
+
+# If not set the namespace
+# kubectl create ns "${K8S_NAMESPACE}"
+
+bin/install.sh
+```
+
+* Get initial password, then use this [link](http://gitlab.example.com) for login
+
+```bash
+export K8S_NAMESPACE="gitlab"
+kubectl get secret --namespace "${K8S_NAMESPACE}" gitlab-gitlab-initial-root-password \
+  -ojsonpath='{.data.password}' | base64 --decode ; echo
+```
+
+* Optional: Export the SSH port from K8s
+
+```bash
+helm upgrade -i gitlab gitlab/gitlab \
+  --namespace "${K8S_NAMESPACE:-default}" \
+  --set global.shell.port=32022 \
+  --set nginx-ingress.controller.service.type=NodePort
+
+# After set the SSH key into gitlab and configure the `~/.ssh/configure`, you can use SSH to clone your code
+# Host example.com
+#   PreferredAuthentications publickey
+#   IdentityFile ~/.ssh/your_private_key
+#   Port 32022
+
+git clone ssh://git@gitlab.example.com:32022/[Project]/[REPO].git
+```
+
+* Reduce the deployment replicas
+
+The default min replicas is 2 for webservice, gitlab-shell, kas and sidekiq.
+We can use the following commands to reduce the deployment replicas.
+
+```shell
+# Get the current replicas
+kubectl get hpa -n gitlab
+
+# Modify the configure and set the minReplicas to 1
+kubectl edit hpa gitlab-webservice-default -n gitlab
+```
+
+* Register Gitlab runner into the cluster
+
+```bash
+helm upgrade -i gitlab-runner gitlab/gitlab-runner \
+  --namespace gitlab \
+  -f helm/gitlab-runner-values.yaml \
+  --set gitlabUrl=http://gitlab.${GITLAB_HOST},runnerToken=${RUNNER_TOKEN},runUntagged=true \
+  --set s3ServerAddress=${S3_SERVER_ADDRESS},s3AccessKey=${S3_ACCESS_KEY},s3SecretKey=${S3_SECRET_KEY},s3BucketName=${S3_BUCKET_NAME}
+
+# If the runner cannot be registered by the TSL issue, you can use the following command to set the internal url
+helm upgrade -i gitlab-runner gitlab/gitlab-runner \
+  --namespace gitlab \
+  -f helm/gitlab-runner-values.yaml \
+  --set gitlabUrl=http://gitlab-webservice-default.gitlab:8181,runnerToken=${RUNNER_TOKEN},runUntagged=true \
+  --set s3ServerAddress=${S3_SERVER_ADDRESS},s3AccessKey=${S3_ACCESS_KEY},s3SecretKey=${S3_SECRET_KEY},s3BucketName=${S3_BUCKET_NAME}
+```
+
+* Register Gitlab runner from docker into Gitlab
+
+```shell
+# Register the runner
+docker compose run --rm gitlab-runner register --url <GITLAB_URL> --token <RUNNER_TOKEN> --clone-url <GITLAB_URL>
+
+# Start the runner service
+docker compose up -d
+```
+
+* Troubleshoots for GitLab Runner:
+
+1. Got error from the job which related to `SSL certificate problem: self-signed certificate`
+
+> Set the variables in the project's CI/CD settings, `GIT_SSL_NO_VERIFY=1`
+Or try to add the self-signed CA in the cluster,
+[doc](https://docs.gitlab.com/runner/configuration/tls-self-signed.html).
+
+* Upgrade the service
+
+```shell
+# Export current HELM values
+helm get values gitlab -n gitlab > gitlab_values.yaml
+
+# For more versions: https://docs.gitlab.com/charts/installation/version_mappings.html
+helm upgrade gitlab gitlab/gitlab -n gitlab \
+  --version <CHART_NEW_VERSION> \
+  -f gitlab_values.yaml \
+  --set gitlab.migrations.enabled=true \
+  --set global.gitlabVersion=<GITLAB_VERSION>
+```
+
+> You can check the new version form the website, path: Help -> Help
+
+* Uninstall the service
+
+```shell
+export K8S_NAMESPACE="gitlab"
+bin/uninstall.sh
+```
