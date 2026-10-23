@@ -3,11 +3,13 @@
 Some useful tools running by docker or K8s
 
 * [Benchmark](./benchmark)
+* [Docker Registry](./docker-registry)
 * [ELK](./elk)
 * [Gitlab](./gitlab)
 * [JSON tool: JQ](./jq)
 * [Kafka](./kafka)
 * [Local S3](./aws_s3)
+* [Monitor](./monitor)
 * [MySQL NDB Cluster](./mysql_ndb_cluster)
 * [MySQLTuner](./mysqltuner)
 * [MySQLKiller](./mysqlkiller)

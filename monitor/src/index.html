@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="pageTitle">System monitor</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="src/app.css">
+</head>
+<body>
+  <div class="page">
+    <header class="top">
+      <div class="brand">
+        <img class="mark" src="assets/icon.svg" alt="" width="48" height="48">
+        <div>
+          <p class="eyebrow" id="host" data-i18n="hostPlaceholder">This machine</p>
+          <h1 data-i18n="title">System resources</h1>
+          <p class="sub" id="subtitle" data-i18n="loading">Reading CPU and GPU…</p>
+        </div>
+      </div>
+      <div class="tools">
+        <div class="lang" role="group" data-i18n-aria="language" aria-label="Language">
+          <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+          <button type="button" data-lang="en" aria-pressed="true">English</button>
+        </div>
+        <div class="live" id="live">
+          <span class="dot"></span>
+          <span id="live-text" data-i18n="connecting">Connecting</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="metrics" id="metrics"></section>
+
+    <div class="ranges" id="ranges" role="group" data-i18n-aria="historyRange" aria-label="Time range">
+      <button type="button" data-range="60" data-i18n="range60">60 sec</button>
+      <button type="button" data-range="900" data-i18n="range900">15 min</button>
+      <button type="button" data-range="3600" data-i18n="range3600">1 hour</button>
+      <button type="button" data-range="21600" data-i18n="range21600">6 hours</button>
+      <button type="button" data-range="86400" data-i18n="range86400">24 hours</button>
+      <button type="button" data-range="604800" data-i18n="range604800">7 days</button>
+    </div>
+
+    <section class="charts">
+      <article class="panel">
+        <div class="panel-head">
+          <h2>CPU</h2>
+          <div class="panel-tools">
+            <p id="cpu-chart-label" data-i18n="cpuChartIdle">Usage</p>
+            <button type="button" class="zoom-open" data-zoom="cpu" data-i18n="zoom">Expand</button>
+          </div>
+        </div>
+        <canvas id="cpu-chart"></canvas>
+      </article>
+      <article class="panel">
+        <div class="panel-head">
+          <h2>GPU</h2>
+          <div class="panel-tools">
+            <p id="gpu-chart-label" data-i18n="gpuChartIdle">Usage and power</p>
+            <button type="button" class="zoom-open" data-zoom="gpu" data-i18n="zoom">Expand</button>
+          </div>
+        </div>
+        <canvas id="gpu-chart"></canvas>
+        <div class="legend">
+          <span class="gpu"><i></i><span data-i18n="usage">Usage</span></span>
+          <span class="power"><i></i><span data-i18n="powerOfLimit">Power / limit</span></span>
+        </div>
+      </article>
+    </section>
+
+    <section class="detail">
+      <article class="panel">
+        <div class="panel-head">
+          <h2 data-i18n="threads">Threads</h2>
+          <p id="thread-meta"></p>
+        </div>
+        <div class="threads" id="threads"></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head">
+          <h2 data-i18n="gpuPanel">GPU</h2>
+          <p id="gpu-meta" data-i18n="gpuMeta">Power, memory, temperature</p>
+        </div>
+        <div id="gpu-detail"></div>
+      </article>
+    </section>
+
+    <p class="error" id="error" hidden></p>
+  </div>
+
+  <dialog class="zoom" id="zoom">
+    <div class="zoom-card">
+      <div class="zoom-head">
+        <div>
+          <h2 id="zoom-title">CPU</h2>
+          <p id="zoom-note"></p>
+        </div>
+        <button type="button" class="zoom-open" id="zoom-close" data-i18n="close">Close</button>
+      </div>
+      <form class="zoom-filter" id="zoom-filter">
+        <label>
+          <span data-i18n="from">From</span>
+          <input id="zoom-start" type="datetime-local" step="1" required>
+        </label>
+        <label>
+          <span data-i18n="to">To</span>
+          <input id="zoom-end" type="datetime-local" step="1" required>
+        </label>
+        <button type="submit" data-i18n="applyRange">Show</button>
+      </form>
+      <div class="zoom-summary" id="zoom-summary"></div>
+      <div class="legend" id="zoom-legend"></div>
+      <div class="zoom-plot">
+        <canvas id="zoom-chart"></canvas>
+        <div id="zoom-tip" hidden></div>
+      </div>
+      <p class="note" data-i18n="zoomHint">Drag across the chart to select a time span.</p>
+    </div>
+  </dialog>
+  <script src="i18n/zh.js"></script>
+  <script src="i18n/en.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>

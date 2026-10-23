@@ -60,14 +60,24 @@ kubectl edit hpa gitlab-webservice-default -n gitlab
 ```bash
 helm upgrade -i gitlab-runner gitlab/gitlab-runner \
   --namespace gitlab \
-  --set gitlabUrl=http://gitlab.${GITLAB_HOST},runnerToken=${RUNNER_TOKEN},runUntagged=true \
-  --set rbac.create=true,rbac.serviceAccount=gitlab-runner,rbac.serviceAccountName=gitlab-runner
+  -f helm/gitlab-runner-values.yaml \
+  --set gitlabUrl=http://gitlab.${GITLAB_HOST},runnerToken=${RUNNER_TOKEN},runUntagged=true
 
 # If the runner cannot be registered by the TSL issue, you can use the following command to set the internal url
 helm upgrade -i gitlab-runner gitlab/gitlab-runner \
   --namespace gitlab \
-  --set gitlabUrl=http://gitlab-webservice-default.gitlab:8080,runnerToken=${RUNNER_TOKEN},runUntagged=true \
-  --set rbac.create=true,rbac.serviceAccount=gitlab-runner,rbac.serviceAccountName=gitlab-runner
+  -f helm/gitlab-runner-values.yaml \
+  --set gitlabUrl=http://gitlab-webservice-default.gitlab:8181,runnerToken=${RUNNER_TOKEN},runUntagged=true
+```
+
+* Register Gitlab runner from docker into Gitlab
+
+```shell
+# Register the runner
+docker compose run --rm gitlab-runner register --url <GITLAB_URL> --token <RUNNER_TOKEN> --clone-url <GITLAB_URL>
+
+# Start the runner service
+docker compose up -d
 ```
 
 * Troubleshoots for GitLab Runner:
@@ -89,7 +99,7 @@ helm upgrade gitlab gitlab/gitlab -n gitlab \
   --version <CHART_NEW_VERSION> \
   -f gitlab_values.yaml \
   --set gitlab.migrations.enabled=true \
-  --set global.gitlabVersion= <GITLAB_VERSION>
+  --set global.gitlabVersion=<GITLAB_VERSION>
 ```
 
 > You can check the new version form the website, path: Help -> Help

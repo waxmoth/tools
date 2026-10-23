@@ -1,0 +1,23 @@
+# For more settings: https://github.com/Joxit/helm-charts/blob/main/charts/docker-registry-ui/values.yaml
+global:
+  name: docker
+  imagePullPolicy: IfNotPresent
+
+ui:
+  title: "Docker registry"
+  showContentDigest: true
+  registrySecured: true
+  image: joxit/docker-registry-ui:2.5.2
+  ingress:
+    enabled: true
+
+registry:
+  enabled: true
+  image: registry:2.8.2
+  auth:
+    basic:
+      enabled: true
+  ingress:
+    enabled: true
+    annotations:
+      "nginx.ingress.kubernetes.io/proxy-body-size": 500m

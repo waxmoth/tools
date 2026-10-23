@@ -61,50 +61,7 @@ eck-kibana:
       - host: "monitor.example.com"
         path: "/"
 eck-beats:
-  enabled: true
-  version: 8.15.2
-  fullnameOverride: beats
-  spec:
-    type: filebeat
-    daemonSet: null
-    config:
-      filebeat.inputs:
-        - type: log
-          paths:
-            - /data/logstash-tutorial.log
-      processors:
-        - add_host_metadata: {}
-        - add_cloud_metadata: {}
-      output.logstash:
-        # This needs to be {{logstash-name}}-ls-beats:5044
-        hosts: ["logstash-ls-beats-ls-beats:5044"]
-    deployment:
-      podTemplate:
-        spec:
-          automountServiceAccountToken: true
-          initContainers:
-            - name: download-tutorial
-              image: curlimages/curl
-              imagePullPolicy: IfNotPresent
-              command: ["/bin/sh"]
-              args: ["-c", "curl -L https://download.elastic.co/demos/logstash/gettingstarted/logstash-tutorial.log.gz | gunzip -c > /data/logstash-tutorial.log"]
-              volumeMounts:
-                - name: data
-                  mountPath: /data
-          containers:
-            - name: filebeat
-              securityContext:
-                runAsUser: 1000
-              volumeMounts:
-                - name: data
-                  mountPath: /data
-                - name: beat-data
-                  mountPath: /usr/share/filebeat/data
-          volumes:
-            - name: data
-              emptydir: {}
-            - name: beat-data
-              emptydir: {}
+  enabled: false
 eck-logstash:
   enabled: true
   version: 8.15.2
