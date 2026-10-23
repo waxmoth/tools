@@ -1,0 +1,24 @@
+services:
+  monitor:
+    build: .
+    ports:
+      - "127.0.0.1:8780:8780"
+    environment:
+      BIND: 0.0.0.0
+      HOST_PROC: /host/proc
+      HOST_SYS: /host/sys
+      HOST_HOSTNAME_FILE: /host/etc/hostname
+      DATA_DIR: /app/data
+    volumes:
+      - .:/app
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /etc/hostname:/host/etc/hostname:ro
+      - /usr/bin/nvidia-smi:/usr/bin/nvidia-smi:ro
+      - /usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.1:ro
+    devices:
+      - /dev/nvidia0
+      - /dev/nvidiactl
+      - /dev/nvidia-modeset
+      - /dev/nvidia-uvm
+    restart: unless-stopped
