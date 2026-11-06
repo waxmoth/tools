@@ -29,6 +29,7 @@ pub struct Session {
     pub work_limit: Duration,
     pub break_len: Duration,
     pub idle_pause: Duration,
+    boot_id: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -37,6 +38,9 @@ struct Persisted {
     paused: bool,
     work_ms: u64,
     break_remaining_ms: Option<u64>,
+    /// Kernel boot id. A different id means the machine rebooted, so the timer starts over.
+    #[serde(default)]
+    boot_id: Option<String>,
 }
 
 impl Session {
@@ -49,6 +53,7 @@ impl Session {
             work_limit: config.work,
             break_len: config.break_len,
             idle_pause: config.idle_pause,
+            boot_id: current_boot_id(),
         }
     }
 
@@ -62,14 +67,39 @@ impl Session {
     }
 
     pub fn load(path: &Path, config: &Config, now: Instant) -> Result<Self> {
+        let boot_id = current_boot_id();
+        let (session, reset) = Self::load_for_boot(path, config, now, boot_id.as_deref())?;
+        if reset {
+            eprintln!("sitbreak: new boot detected, timer reset");
+        }
+        Ok(session)
+    }
+
+    pub fn load_for_boot(
+        path: &Path,
+        config: &Config,
+        now: Instant,
+        boot_id: Option<&str>,
+    ) -> Result<(Self, bool)> {
+        let Some(boot_id) = boot_id else {
+            return Ok((Self::new(config), true));
+        };
         if !path.exists() {
-            return Ok(Self::new(config));
+            let mut session = Self::new(config);
+            session.boot_id = Some(boot_id.to_string());
+            return Ok((session, false));
         }
         let text = fs::read_to_string(path)
             .with_context(|| format!("failed to read {}", path.display()))?;
         let persisted: Persisted = serde_json::from_str(&text)
             .with_context(|| format!("failed to parse {}", path.display()))?;
+        if persisted.boot_id.as_deref() != Some(boot_id) {
+            let mut session = Self::new(config);
+            session.boot_id = Some(boot_id.to_string());
+            return Ok((session, true));
+        }
         let mut session = Self::new(config);
+        session.boot_id = Some(boot_id.to_string());
         session.paused = persisted.paused;
         if persisted.phase == "breaking" {
             let remaining = Duration::from_millis(persisted.break_remaining_ms.unwrap_or(0));
@@ -85,7 +115,7 @@ impl Session {
                 session.enter_break(now);
             }
         }
-        Ok(session)
+        Ok((session, false))
     }
 
     pub fn store(&self, path: &Path, now: Instant) -> Result<()> {
@@ -101,12 +131,17 @@ impl Session {
             paused: self.paused,
             work_ms: u64::try_from(self.work.as_millis()).unwrap_or(u64::MAX),
             break_remaining_ms: self.break_remaining(now).map(|d| d.as_millis() as u64),
+            boot_id: self.boot_id.clone(),
         };
         let body = serde_json::to_vec_pretty(&persisted)?;
         let tmp = path.with_extension("json.tmp");
         fs::write(&tmp, body).with_context(|| format!("failed to write {}", tmp.display()))?;
         fs::rename(&tmp, path).with_context(|| format!("failed to save {}", path.display()))?;
         Ok(())
+    }
+
+    pub fn set_boot_id(&mut self, boot_id: impl Into<String>) {
+        self.boot_id = Some(boot_id.into());
     }
 
     pub fn break_remaining(&self, now: Instant) -> Option<Duration> {
@@ -158,6 +193,16 @@ impl Session {
     }
 }
 
+fn current_boot_id() -> Option<String> {
+    let text = fs::read_to_string("/proc/sys/kernel/random/boot_id").ok()?;
+    let id = text.trim();
+    if id.is_empty() {
+        None
+    } else {
+        Some(id.to_string())
+    }
+}
+
 fn clamp_delta(delta: Duration) -> Duration {
     if delta > Duration::from_secs(30) {
         Duration::ZERO
@@ -165,75 +210,5 @@ fn clamp_delta(delta: Duration) -> Duration {
         Duration::from_secs(5)
     } else {
         delta
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    fn session(work: u64, break_len: u64, idle_pause: u64) -> Session {
-        Session::new(&Config {
-            work: Duration::from_secs(work),
-            break_len: Duration::from_secs(break_len),
-            idle_pause: Duration::from_secs(idle_pause),
-            language: crate::i18n::Language::En,
-        })
-    }
-
-    #[test]
-    fn accumulates_while_active() {
-        let mut session = session(60, 15, 60);
-        let now = Instant::now();
-        let effect = session.tick(Duration::from_secs(4), Duration::from_secs(5), now);
-        assert_eq!(effect, Effect::None);
-        assert_eq!(session.work, Duration::from_secs(4));
-        assert_eq!(session.phase, Phase::Working);
-    }
-
-    #[test]
-    fn pauses_when_idle_or_manually_paused() {
-        let mut session = session(60, 15, 60);
-        let now = Instant::now();
-        session.tick(Duration::from_secs(10), Duration::from_secs(60), now);
-        assert_eq!(session.work, Duration::ZERO);
-        session.paused = true;
-        session.tick(Duration::from_secs(10), Duration::ZERO, now);
-        assert_eq!(session.work, Duration::ZERO);
-    }
-
-    #[test]
-    fn starts_and_ends_break() {
-        let mut session = session(5, 15, 60);
-        let start = Instant::now();
-        let effect = session.tick(Duration::from_secs(5), Duration::ZERO, start);
-        assert_eq!(effect, Effect::StartedBreak);
-        assert_eq!(session.phase, Phase::Breaking);
-        assert_eq!(session.work, Duration::ZERO);
-
-        let mid = session.tick(
-            Duration::from_secs(1),
-            Duration::ZERO,
-            start + Duration::from_secs(14),
-        );
-        assert_eq!(mid, Effect::None);
-        assert_eq!(session.phase, Phase::Breaking);
-
-        let end = session.tick(
-            Duration::ZERO,
-            Duration::ZERO,
-            start + Duration::from_secs(15),
-        );
-        assert_eq!(end, Effect::EndedBreak);
-        assert_eq!(session.phase, Phase::Working);
-    }
-
-    #[test]
-    fn long_gap_does_not_count_as_usage() {
-        let mut session = session(3600, 900, 60);
-        let now = Instant::now();
-        session.tick(Duration::from_secs(120), Duration::ZERO, now);
-        assert_eq!(session.work, Duration::ZERO);
-        assert_eq!(session.phase, Phase::Working);
     }
 }

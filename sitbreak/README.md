@@ -53,5 +53,5 @@ Config and accumulated time are kept. Delete `~/.local/state/sitbreak/state.json
 
 - This version supports X11 only. On a Wayland session the daemon waits for X11.
 - Idle time comes from the X server's MIT-SCREEN-SAVER extension. Watching video without touching the keyboard or mouse pauses the work timer.
-- The break countdown uses a monotonic clock. Stopping the service and starting it again continues an unfinished break.
+- The break countdown uses a monotonic clock. Stopping the service and starting it again during the same boot continues an unfinished break. A reboot starts the work timer from zero.
 - Chinese text uses `DroidSansFallbackFull`. Digits and English use `DejaVu Sans`. Both ship with an Ubuntu desktop install.

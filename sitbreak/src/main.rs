@@ -1,19 +1,13 @@
-mod config;
-mod daemon;
-mod i18n;
-mod ipc;
-mod lock;
-mod paths;
-mod session;
-mod x11;
-
 use std::env;
 use std::process::ExitCode;
 use std::time::Duration;
 
 use anyhow::{bail, Context, Result};
-
-use crate::lock::LockMode;
+use sitbreak::config;
+use sitbreak::i18n;
+use sitbreak::ipc;
+use sitbreak::lock::{self, LockMode};
+use sitbreak::paths;
 
 fn main() -> ExitCode {
     match dispatch() {
@@ -29,7 +23,7 @@ fn dispatch() -> Result<()> {
     let mut args = env::args().skip(1);
     let cmd = args.next();
     match cmd.as_deref() {
-        Some("daemon") => daemon::run(),
+        Some("daemon") => sitbreak::daemon::run(),
         Some("lock") => lock::run(LockMode::FollowDaemon),
         Some("preview") => {
             let language = config::interface_language();
